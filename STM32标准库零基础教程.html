@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STM32标准库零基础教程 - 完整版（OLED/PWM/I2C/UART/中断/Flash）</title>
+    <!-- Prism.js 代码高亮库 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 头部区域 */
+        header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform: rotate(30deg);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .chip-info {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* 视频教程区域 */
+        .video-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 6px solid #ff6b6b;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .video-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .video-card h4 {
+            background: #3498db;
+            color: white;
+            padding: 1rem;
+            margin: 0;
+        }
+
+        .video-card p {
+            padding: 1rem;
+            margin: 0;
+        }
+
+        /* 代码放置位置提示系统 */
+        .code-placement-guide {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .placement-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* 主要内容区域 */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 992px) {
+            .content-wrapper {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .tutorial-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        /* 章节容器 */
+        .section-container {
+            margin-bottom: 4rem;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            scroll-margin-top: 20px; /* 为跳转添加偏移 */
+        }
+
+        .section-container:hover {
+            border-color: #3498db;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: -2rem -2rem 1.5rem -2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        .video-link {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .video-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 代码块样式 */
+        .code-block-container {
+            position: relative;
+            margin: 2rem 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .code-block-container:hover {
+            border-color: #3498db;
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.15);
+        }
+
+        .code-header {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .code-location {
+            background: #e74c3c;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* 零基础特别提示 */
+        .beginner-tip {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #e17055;
+            position: relative;
+        }
+
+        .beginner-tip::before {
+            content: '👶 零基础提示';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #e17055;
+            color: white;
+            padding: 0.2rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 侧边栏 - 学习路径 */
+        .sidebar {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .learning-path {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .learning-path li {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .learning-path li:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .learning-path li.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .learning-path li.completed {
+            border-left-color: #2ecc71;
+            background: #e8f6ef;
+        }
+
+        .learning-path li.completed::before {
+            content: '✓';
+            background: #2ecc71;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* 进度跟踪 */
+        .progress-tracker {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 章节导航按钮 */
+        .chapter-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .nav-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 章节索引 */
+        .chapter-index {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        @media (min-width: 1200px) {
+            .chapter-index {
+                display: block;
+            }
+        }
+
+        .chapter-index a {
+            display: block;
+            padding: 0.5rem;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            margin-bottom: 0.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-index a:hover {
+            background: #e3f2fd;
+            color: #3498db;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chapter-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 标准库特色标识 */
+        .std-library-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+            z-index: 10;
+        }
+
+        /* 外设图标 */
+        .peripheral-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        /* 代码注释样式 */
+        code .comment {
+            color: #6a9955;
+        }
+
+        code .keyword {
+            color: #569cd6;
+        }
+
+        code .function {
+            color: #dcdcaa;
+        }
+
+        code .string {
+            color: #ce9178;
+        }
+
+        /* 配置步骤可视化 */
+        .config-steps {
+            background: #f8f9ff;
+            border: 2px dashed #3498db;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+        }
+
+        .config-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        /* 动画效果 */
+        @keyframes highlight {
+            0% { background-color: #fff8e1; }
+            100% { background-color: white; }
+        }
+
+        .highlight-section {
+            animation: highlight 2s ease;
+        }
+
+        /* 视频教程时间线 */
+        .video-timeline {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .time-marker {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <h1><i class="fas fa-microchip"></i> STM32标准库零基础教程（完整版）</h1>
+        <p class="subtitle">
+            <i class="fas fa-baby"></i> 从0到1完整掌握STM32F103C8T6所有外设
+        </p>
+        <p>基于江协科技【STM32入门教程-2023版】完整视频集</p>
+        <div class="chip-info">
+            <i class="fas fa-microchip"></i> STM32F103C8T6 | 
+            <i class="fas fa-code"></i> 标准库(StdPeriph) | 
+            <i class="fas fa-graduation-cap"></i> 零基础友好
+        </div>
+    </header>
+
+    <!-- 视频教程区域 -->
+    <section class="video-section">
+        <h2><i class="fas fa-video"></i> 配套视频教程全集</h2>
+        <p>基于江协科技的《STM32入门教程-2023版》完整视频序列：</p>
+        
+        <div class="video-grid">
+            <div class="video-card">
+                <h4>P1-P3: 开发环境搭建</h4>
+                <p>Keil5安装、标准库下载、第一个工程创建</p>
+            </div>
+            <div class="video-card">
+                <h4>P4-P6: GPIO基础</h4>
+                <p>点亮LED、按键控制、GPIO寄存器操作</p>
+            </div>
+            <div class="video-card">
+                <h4>P7-P9: 中断系统</h4>
+                <p>外部中断、中断优先级、中断服务函数</p>
+            </div>
+            <div class="video-card">
+                <h4>P10-P12: 定时器</h4>
+                <p>定时器基础、PWM输出、输入捕获</p>
+            </div>
+            <div class="video-card">
+                <h4>P13-P15: 串口通信</h4>
+                <p>UART收发、中断接收、printf重定向</p>
+            </div>
+            <div class="video-card">
+                <h4>P16-P18: I2C与OLED</h4>
+                <p>I2C协议原理、OLED显示、字库使用</p>
+            </div>
+            <div class="video-card">
+                <h4>P19-P21: SPI与Flash</h4>
+                <p>SPI通信原理、W25Q64读写、文件系统</p>
+            </div>
+            <div class="video-card">
+                <h4>P22-P24: ADC与DMA</h4>
+                <p>ADC采集、DMA传输、多通道采集</p>
+            </div>
+        </div>
+        
+        <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+            <i class="fas fa-link"></i> 完整视频地址：<a href="https://www.bilibili.com/video/BV1th411z7sn" target="_blank">https://www.bilibili.com/video/BV1th411z7sn</a>
+        </p>
+    </section>
+
+    <div class="content-wrapper">
+        <!-- 主教程内容 -->
+        <main class="tutorial-section" id="mainContent">
+            <!-- 章节1: GPIO基础 -->
+            <div class="section-container" id="chapter1">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-lightbulb"></i> 第1章：GPIO基础操作</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=4" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P4-P6
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> GPIO就是芯片的"引脚"，这章学习如何用程序控制引脚的电平。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> GPIO初始化代码</span>
+                        <div class="code-location">位置：main.c的main函数开头</div>
+                    </div>
+                    <pre id="code1" class="line-numbers"><code class="language-c">
+#include "stm32f10x.h"
+
+// GPIO初始化函数
+void GPIO_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    
+    // 1. 开启GPIOB时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    
+    // 2. 配置PB0为推挽输出（控制LED）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    
+    // 3. 配置PA0为上拉输入（连接按键）
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;  // 上拉输入模式
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+
+// main函数中的调用位置
+int main(void)
+{
+    GPIO_Configuration();  // 放在main函数开头
+    
+    while(1)
+    {
+        // 你的主循环代码
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+
+            <!-- 章节2: 中断系统 -->
+            <div class="section-container" id="chapter2">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-bolt"></i> 第2章：中断系统（外部中断）</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=7" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P7-P9
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> 中断就是"打断"，当有紧急事件发生时，CPU会暂停当前工作去处理。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> 外部中断配置</span>
+                        <div class="code-location">位置：新建exti.c文件或放在main.c开头</div>
+                    </div>
+                    <pre id="code2" class="line-numbers"><code class="language-c">
+#include "stm32f10x.h"
+#include "stm32f10x_exti.h"
+
+// 外部中断初始化函数
+void EXTI_Configuration(void)
+{
+    EXTI_InitTypeDef EXTI_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    
+    // 1. 开启GPIOA时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    
+    // 2. 配置PA0为上拉输入（连接按键）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // 3. 开启AFIO时钟（必须开启！）
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    
+    // 4. 连接GPIO到EXTI线
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource0);
+    
+    // 5. 配置EXTI线0
+    EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  // 下降沿触发
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTI_InitStructure);
+    
+    // 6. 配置NVIC中断优先级
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+// 中断服务函数（必须放在stm32f10x_it.c文件中）
+void EXTI0_IRQHandler(void)
+{
+    if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+    {
+        // 按键按下时执行的操作
+        GPIO_WriteBit(GPIOB, GPIO_Pin_0, 
+            (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_0)));
+        
+        // 清除中断标志位（必须清除！）
+        EXTI_ClearITPendingBit(EXTI_Line0);
+    }
+}
+                    </code></pre>
+                </div>
+
+                <div class="code-placement-guide">
+                    <h4><i class="fas fa-map-signs"></i> 重要！代码放置位置说明</h4>
+                    <p><strong>EXTI_Configuration()函数</strong> → 放在main.c的main函数开头调用</p>
+                    <p><strong>EXTI0_IRQHandler()函数</strong> → <span style="color: #e74c3c; font-weight: bold;">必须放在stm32f10x_it.c文件中！</span></p>
+                    <p><strong>stm32f10x_it.c位置</strong>：工程目录 → User文件夹 → stm32f10x_it.c</p>
+                    <p><i class="fas fa-lightbulb"></i> <strong>提示：</strong> 找不到这个文件？在Keil中按F12或右键工程查看文件结构。</p>
+                </div>
+            </div>
+
+            <!-- 章节3: PWM输出 -->
+            <div class="section-container" id="chapter3">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-wave-square"></i> 第3章：PWM输出（控制LED亮度）</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=10" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P10-P12
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> PWM就是"脉冲宽度调制"，可以控制LED的亮度、电机的速度。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> PWM配置（定时器2通道1）</span>
+                        <div class="code-location">位置：新建pwm.c文件或放在main.c开头</div>
+                    </div>
+                    <pre id="code3" class="line-numbers"><code class="language-c">
+#include "stm32f10x.h"
+#include "stm32f10x_tim.h"
+
+// PWM初始化函数（使用TIM2通道1，对应PA0引脚）
+void PWM_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    
+    // 1. 开启时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    
+    // 2. 配置PA0为复用推挽输出（PWM输出必须用复用功能！）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  // 复用推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // 3. 配置定时器2时基
+    TIM_TimeBaseStructure.TIM_Period = 999;          // 自动重装载值：1000-1
+    TIM_TimeBaseStructure.TIM_Prescaler = 71;        // 预分频值：72-1
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+    
+    // 4. 配置PWM输出通道1
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OCInitStructure.TIM_Pulse = 500;  // 初始占空比50%（500/1000）
+    TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);
+    
+    // 5. 开启定时器预装载和定时器
+    TIM_ARRPreloadConfig(TIM2, ENABLE);
+    TIM_Cmd(TIM2, ENABLE);
+}
+
+// 修改PWM占空比的函数
+void PWM_SetDutyCycle(uint16_t duty)  // duty: 0-1000
+{
+    if(duty > 999) duty = 999;
+    TIM_SetCompare1(TIM2, duty);
+}
+
+// main函数中使用示例
+int main(void)
+{
+    uint16_t brightness = 0;
+    
+    PWM_Configuration();  // 初始化PWM
+    
+    while(1)
+    {
+        // 呼吸灯效果
+        for(brightness = 0; brightness < 1000; brightness += 10)
+        {
+            PWM_SetDutyCycle(brightness);
+            Delay(10000);  // 简单延时函数
+        }
+        for(brightness = 1000; brightness > 0; brightness -= 10)
+        {
+            PWM_SetDutyCycle(brightness);
+            Delay(10000);
+        }
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+
+            <!-- 章节4: I2C与OLED显示 -->
+            <div class="section-container" id="chapter4">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-display"></i> 第4章：I2C通信与OLED显示</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=16" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P16-P18
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> I2C只需要两根线（SDA数据线、SCL时钟线）就能连接多个设备，OLED就是小屏幕。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> I2C初始化（模拟I2C）</span>
+                        <div class="code-location">位置：新建oled.c和oled.h文件</div>
+                    </div>
+                    <pre id="code4" class="line-numbers"><code class="language-c">
+// oled.h头文件内容
+#ifndef __OLED_H
+#define __OLED_H
+
+#include "stm32f10x.h"
+
+void OLED_Init(void);
+void OLED_Clear(void);
+void OLED_ShowString(uint8_t line, uint8_t column, char *str);
+void OLED_ShowNum(uint8_t line, uint8_t column, uint32_t num, uint8_t len);
+void OLED_ShowChinese(uint8_t x, uint8_t y, uint8_t no);
+
+#endif
+
+// oled.c文件部分内容
+#include "oled.h"
+#include "oledfont.h"  // 字库文件
+
+// 引脚定义（使用PB8-PB9做模拟I2C）
+#define OLED_SCL_PIN    GPIO_Pin_8
+#define OLED_SDA_PIN    GPIO_Pin_9
+#define OLED_SCL_PORT   GPIOB
+#define OLED_SDA_PORT   GPIOB
+
+// I2C起始信号
+void OLED_I2C_Start(void)
+{
+    OLED_SDA(1);
+    OLED_SCL(1);
+    OLED_SDA(0);
+    OLED_SCL(0);
+}
+
+// I2C停止信号
+void OLED_I2C_Stop(void)
+{
+    OLED_SDA(0);
+    OLED_SCL(1);
+    OLED_SDA(1);
+}
+
+// OLED初始化函数
+void OLED_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    
+    // 开启GPIOB时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    
+    // 配置PB8、PB9为开漏输出
+    GPIO_InitStructure.GPIO_Pin = OLED_SCL_PIN | OLED_SDA_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;  // 开漏输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    
+    // OLED硬件初始化序列
+    OLED_WriteCommand(0xAE);  // 关闭显示
+    OLED_WriteCommand(0xD5);  // 设置显示时钟分频比/振荡器频率
+    OLED_WriteCommand(0x80);
+    OLED_WriteCommand(0xA8);  // 设置多路复用率
+    OLED_WriteCommand(0x3F);
+    // ... 更多初始化命令
+    
+    OLED_Clear();  // 清屏
+    OLED_WriteCommand(0xAF);  // 开启显示
+}
+
+// 显示字符串函数
+void OLED_ShowString(uint8_t line, uint8_t column, char *str)
+{
+    uint8_t i;
+    for(i = 0; str[i] != '\0'; i++)
+    {
+        OLED_ShowChar(line, column + i, str[i]);
+    }
+}
+
+// main.c中使用示例
+int main(void)
+{
+    OLED_Init();  // 初始化OLED
+    
+    OLED_ShowString(1, 1, "Hello STM32!");
+    OLED_ShowString(2, 1, "OLED Display Test");
+    OLED_ShowString(3, 1, "Temp: 25.6C");
+    OLED_ShowString(4, 1, "Humidity: 60%");
+    
+    while(1)
+    {
+        // 主循环
+    }
+}
+                    </code></pre>
+                </div>
+
+                <div class="code-placement-guide">
+                    <h4><i class="fas fa-clipboard-list"></i> OLED显示项目文件结构</h4>
+                    <pre style="background: #2c3e50; color: #ecf0f1; padding: 1rem; border-radius: 5px; font-family: 'Consolas', monospace;">
+项目结构：
+Project/
+├── CORE/              （核心文件，标准库提供）
+├── FWLIB/             （标准库文件）
+├── HARDWARE/          （硬件驱动）
+│   ├── oled.c         （OLED驱动代码 - 主要在这里）
+│   ├── oled.h         （OLED头文件）
+│   ├── oledfont.h     （字库文件）
+│   └── delay.c        （延时函数）
+├── SYSTEM/            （系统文件）
+└── User/
+    ├── main.c         （主程序 - 调用OLED函数）
+    ├── stm32f10x_it.c （中断服务函数）
+    └── ...            （其他用户文件）
+                    </pre>
+                </div>
+            </div>
+
+            <!-- 章节5: UART串口通信 -->
+            <div class="section-container" id="chapter5">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-exchange-alt"></i> 第5章：UART串口通信</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=13" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P13-P15
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> 串口就是STM32和电脑通信的"嘴巴"和"耳朵"，可以通过USB转串口线和电脑对话。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> 串口初始化（USART1）</span>
+                        <div class="code-location">位置：新建usart.c和usart.h文件</div>
+                    </div>
+                    <pre id="code5" class="line-numbers"><code class="language-c">
+// usart.h头文件
+#ifndef __USART_H
+#define __USART_H
+
+#include "stm32f10x.h"
+#include <stdio.h>
+
+void USART1_Config(uint32_t baudrate);
+void USART1_SendByte(uint8_t byte);
+void USART1_SendString(char *str);
+uint8_t USART1_ReceiveByte(void);
+
+// 重定向printf到串口
+int fputc(int ch, FILE *f);
+
+#endif
+
+// usart.c文件
+#include "usart.h"
+
+// 串口1初始化函数
+void USART1_Config(uint32_t baudrate)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    
+    // 1. 开启时钟（USART1在APB2总线上）
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | 
+                          RCC_APB2Periph_GPIOA, ENABLE);
+    
+    // 2. 配置PA9为复用推挽输出（TX发送引脚）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  // 复用推挽输出
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // 3. 配置PA10为浮空输入（RX接收引脚）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  // 浮空输入
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    // 4. 配置USART1参数
+    USART_InitStructure.USART_BaudRate = baudrate;  // 波特率
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    
+    USART_Init(USART1, &USART_InitStructure);
+    USART_Cmd(USART1, ENABLE);
+}
+
+// 发送一个字节
+void USART1_SendByte(uint8_t byte)
+{
+    USART_SendData(USART1, byte);
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+}
+
+// 发送字符串
+void USART1_SendString(char *str)
+{
+    while(*str)
+    {
+        USART1_SendByte(*str++);
+    }
+}
+
+// 重定向printf到串口（重要！）
+int fputc(int ch, FILE *f)
+{
+    USART_SendData(USART1, (uint8_t)ch);
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+    return ch;
+}
+
+// main.c中使用示例
+int main(void)
+{
+    uint8_t received_data;
+    
+    USART1_Config(115200);  // 初始化串口，波特率115200
+    
+    printf("STM32 USART Test Start!\r\n");
+    printf("System Clock: %d Hz\r\n", SystemCoreClock);
+    
+    while(1)
+    {
+        // 接收数据并回传（串口助手发送什么就回传什么）
+        if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
+        {
+            received_data = USART_ReceiveData(USART1);
+            printf("Received: %c (0x%02X)\r\n", received_data, received_data);
+            
+            // 回传数据
+            USART1_SendByte(received_data);
+        }
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+
+            <!-- 章节6: Flash读写 -->
+            <div class="section-container" id="chapter6">
+                <div class="std-library-badge">标准库专属</div>
+                <div class="section-header">
+                    <h2><i class="fas fa-database"></i> 第6章：内部Flash读写</h2>
+                    <a href="https://www.bilibili.com/video/BV1th411z7sn?p=19" target="_blank" class="video-link">
+                        <i class="fas fa-external-link-alt"></i> 观看P19-P21
+                    </a>
+                </div>
+                
+                <div class="beginner-tip">
+                    <p><strong>给零基础同学：</strong> Flash就是STM32内部的"硬盘"，可以保存数据，断电后数据不会丢失。</p>
+                </div>
+
+                <div class="code-block-container">
+                    <div class="code-header">
+                        <span><i class="fas fa-file-code"></i> 内部Flash操作</span>
+                        <div class="code-location">位置：新建flash.c和flash.h文件</div>
+                    </div>
+                    <pre id="code6" class="line-numbers"><code class="language-c">
+// flash.h头文件
+#ifndef __FLASH_H
+#define __FLASH_H
+
+#include "stm32f10x.h"
+
+// Flash起始地址（根据STM32F103C8T6的64KB Flash）
+#define FLASH_START_ADDR  0x08000000
+#define FLASH_SIZE        0x10000      // 64KB
+#define FLASH_PAGE_SIZE   0x400        // 1KB per page
+
+// 使用最后一页存储用户数据（避免擦除程序）
+#define USER_DATA_ADDR    (FLASH_START_ADDR + FLASH_SIZE - FLASH_PAGE_SIZE)
+
+void Flash_ErasePage(uint32_t page_address);
+void Flash_WriteData(uint32_t address, uint32_t *data, uint16_t length);
+void Flash_ReadData(uint32_t address, uint32_t *data, uint16_t length);
+
+#endif
+
+// flash.c文件
+#include "flash.h"
+
+// 解锁Flash
+static void Flash_Unlock(void)
+{
+    FLASH_Unlock();
+    FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
+}
+
+// 锁定Flash
+static void Flash_Lock(void)
+{
+    FLASH_Lock();
+}
+
+// 擦除指定页
+void Flash_ErasePage(uint32_t page_address)
+{
+    Flash_Unlock();
+    
+    // 等待Flash不忙
+    while(FLASH_GetStatus() != FLASH_COMPLETE);
+    
+    // 擦除页
+    FLASH_ErasePage(page_address);
+    
+    // 等待擦除完成
+    while(FLASH_GetStatus() != FLASH_COMPLETE);
+    
+    Flash_Lock();
+}
+
+// 写入数据到Flash
+void Flash_WriteData(uint32_t address, uint32_t *data, uint16_t length)
+{
+    uint16_t i;
+    
+    Flash_Unlock();
+    
+    for(i = 0; i < length; i++)
+    {
+        // 写入一个字（32位）
+        FLASH_ProgramWord(address + i * 4, data[i]);
+        
+        // 等待写入完成
+        while(FLASH_GetStatus() != FLASH_COMPLETE);
+        
+        // 验证写入的数据
+        if(*(uint32_t*)(address + i * 4) != data[i])
+        {
+            // 写入失败处理
+            break;
+        }
+    }
+    
+    Flash_Lock();
+}
+
+// 从Flash读取数据
+void Flash_ReadData(uint32_t address, uint32_t *data, uint16_t length)
+{
+    uint16_t i;
+    
+    for(i = 0; i < length; i++)
+    {
+        data[i] = *(uint32_t*)(address + i * 4);
+    }
+}
+
+// main.c中使用示例
+int main(void)
+{
+    uint32_t write_data[4] = {0x12345678, 0x87654321, 0xABCDEF01, 0xFEDCBA09};
+    uint32_t read_data[4];
+    
+    printf("Flash Test Start!\r\n");
+    
+    // 1. 擦除最后一页Flash
+    Flash_ErasePage(USER_DATA_ADDR);
+    printf("Flash page erased.\r\n");
+    
+    // 2. 写入数据
+    Flash_WriteData(USER_DATA_ADDR, write_data, 4);
+    printf("Data written to Flash.\r\n");
+    
+    // 3. 读取数据
+    Flash_ReadData(USER_DATA_ADDR, read_data, 4);
+    printf("Data read from Flash:\r\n");
+    
+    for(int i = 0; i < 4; i++)
+    {
+        printf("  Address 0x%08X: 0x%08X\r\n", 
+               USER_DATA_ADDR + i * 4, read_data[i]);
+    }
+    
+    // 4. 验证数据
+    uint8_t verify_ok = 1;
+    for(int i = 0; i < 4; i++)
+    {
+        if(write_data[i] != read_data[i])
+        {
+            verify_ok = 0;
+            break;
+        }
+    }
+    
+    if(verify_ok)
+        printf("Flash verify: PASS!\r\n");
+    else
+        printf("Flash verify: FAIL!\r\n");
+    
+    while(1);
+}
+                    </code></pre>
+                </div>
+            </div>
+
+            <!-- 章节导航按钮 -->
+            <div class="chapter-nav">
+                <button class="nav-btn" id="prevChapter">
+                    <i class="fas fa-arrow-left"></i> 上一章
+                </button>
+                <button class="nav-btn" id="nextChapter">
+                    下一章 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <h3><i class="fas fa-road"></i> 完整学习路径</h3>
+            <ul class="learning-path" id="learningPath">
+                <li data-target="chapter1" class="active">
+                    <i class="fas fa-play-circle"></i>
+                    <div>
+                        <strong>阶段1：GPIO基础</strong>
+                        <small>P4-P6 | 点亮LED、按键控制</small>
+                    </div>
+                </li>
+                <li data-target="chapter2">
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段2：中断系统</strong>
+                        <small>P7-P9 | 外部中断、优先级</small>
+                    </div>
+                </li>
+                <li data-target="chapter3">
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段3：PWM输出</strong>
+                        <small>P10-P12 | 呼吸灯、电机控制</small>
+                    </div>
+                </li>
+                <li data-target="chapter4">
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段4：I2C与OLED</strong>
+                        <small>P16-P18 | OLED显示、字库</small>
+                    </div>
+                </li>
+                <li data-target="chapter5">
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段5：UART串口</strong>
+                        <small>P13-P15 | 串口通信、printf重定向</small>
+                    </div>
+                </li>
+                <li data-target="chapter6">
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段6：Flash读写</strong>
+                        <small>P19-P21 | 内部存储、数据保存</small>
+                    </div>
+                </li>
+                <li>
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段7：ADC采集</strong>
+                        <small>P22-P24 | 模拟信号采集</small>
+                    </div>
+                </li>
+                <li>
+                    <i class="far fa-circle"></i>
+                    <div>
+                        <strong>阶段8：DMA传输</strong>
+                        <small>P25-P27 | 直接内存访问</small>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="progress-tracker">
+                <h4><i class="fas fa-chart-line"></i> 学习进度</h4>
+                <p>已完成：<span id="progressPercent">17%</span></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 17%;"></div>
+                </div>
+                <p style="font-size: 0.9rem; color: #666;">
+                    <i class="fas fa-clock"></i> 预计完成时间：32小时
+                </p>
+            </div>
+
+            <h3><i class="fas fa-download"></i> 必备资料</h3>
+            <div class="explanation">
+                <button class="btn" style="width: 100%; margin-bottom: 10px; background: #3498db; color: white;">
+                    <i class="fas fa-download"></i> 下载STM32标准库完整包
+                </button>
+                <button class="btn" style="width: 100%; margin-bottom: 10px; background: #2ecc71; color: white;">
+                    <i class="fas fa-download"></i> 江协科技课件PPT
+                </button>
+                <button class="btn" style="width: 100%; background: #9b59b6; color: white;">
+                    <i class="fas fa-download"></i> 完整示例代码
+                </button>
+            </div>
+
+            <h3><i class="fas fa-question-circle"></i> 快速问答</h3>
+            <div class="explanation" style="background: #fff8e1; border-left: 4px solid #f39c12;">
+                <p><strong>Q：代码复制后报错？</strong></p>
+                <p>A：检查头文件包含和函数声明</p>
+                
+                <p><strong>Q：找不到视频中的文件？</strong></p>
+                <p>A：按照章节提示创建对应文件</p>
+                
+                <p><strong>Q：开发板不工作？</strong></p>
+                <p>A：检查电源、接线、驱动安装</p>
+            </div>
+        </aside>
+
+        <!-- 章节快速索引 -->
+        <div class="chapter-index">
+            <h4><i class="fas fa-bookmark"></i> 快速导航</h4>
+            <a href="#chapter1">1. GPIO基础</a>
+            <a href="#chapter2">2. 中断系统</a>
+            <a href="#chapter3">3. PWM输出</a>
+            <a href="#chapter4">4. I2C与OLED</a>
+            <a href="#chapter5">5. UART串口</a>
+            <a href="#chapter6">6. Flash读写</a>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer style="text-align: center; margin-top: 3rem; padding: 1.5rem; color: #666; border-top: 1px solid #eee;">
+        <p><strong>STM32标准库零基础完整教程</strong> © 2025 | 基于江协科技B站教程</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            完整视频教程：<a href="https://www.bilibili.com/video/BV1th411z7sn" target="_blank" style="color: #3498db;">
+                https://www.bilibili.com/video/BV1th411z7sn
+            </a>
+        </p>
+        <p style="font-size: 0.8rem; margin-top: 1rem; color: #999;">
+            <i class="fas fa-heart" style="color: #e74c3c;"></i> 本教程包含GPIO、中断、PWM、I2C、UART、Flash等所有重要外设
+        </p>
+    </footer>
+
+    <!-- Prism.js 脚本 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+
+    <script>
+        // 学习路径跳转功能
+        document.addEventListener('DOMContentLoaded', function() {
+            Prism.highlightAll();
+            
+            // 获取所有章节和学习路径项
+            const chapters = document.querySelectorAll('.section-container');
+            const pathItems = document.querySelectorAll('.learning-path li');
+            const prevBtn = document.getElementById('prevChapter');
+            const nextBtn = document.getElementById('nextChapter');
+            
+            let currentChapterIndex = 0;
+            
+            // 学习路径点击事件
+            pathItems.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    if (targetId) {
+                        // 移除所有active类
+                        pathItems.forEach(i => i.classList.remove('active'));
+                        // 添加active类
+                        this.classList.add('active');
+                        
+                        // 找到对应的章节
+                        const targetChapter = document.getElementById(targetId);
+                        if (targetChapter) {
+                            // 更新当前章节索引
+                            currentChapterIndex = Array.from(chapters).findIndex(ch => ch.id === targetId);
+                            
+                            // 平滑滚动到目标章节
+                            targetChapter.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'start' 
+                            });
+                            
+                            // 添加高亮效果
+                            highlightChapter(targetChapter);
+                            
+                            // 更新进度
+                            updateProgress(index);
+                            
+                            // 更新导航按钮状态
+                            updateNavButtons();
+                        }
+                    }
+                });
+            });
+            
+            // 上一章按钮
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (currentChapterIndex > 0) {
+                        currentChapterIndex--;
+                        navigateToChapter(currentChapterIndex);
+                    }
+                });
+            }
+            
+            // 下一章按钮
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (currentChapterIndex < chapters.length - 1) {
+                        currentChapterIndex++;
+                        navigateToChapter(currentChapterIndex);
+                    }
+                });
+            }
+            
+            // 导航到指定章节
+            function navigateToChapter(index) {
+                if (index >= 0 && index < chapters.length) {
+                    const chapter = chapters[index];
+                    const targetId = chapter.id;
+                    
+                    // 更新学习路径激活状态
+                    pathItems.forEach(item => {
+                        if (item.getAttribute('data-target') === targetId) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                    
+                    // 平滑滚动到章节
+                    chapter.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                    
+                    // 添加高亮效果
+                    highlightChapter(chapter);
+                    
+                    // 更新进度
+                    updateProgress(index);
+                    
+                    // 更新导航按钮状态
+                    updateNavButtons();
+                }
+            }
+            
+            // 高亮章节
+            function highlightChapter(chapter) {
+                // 移除之前的高亮
+                chapters.forEach(ch => {
+                    ch.classList.remove('highlight-section');
+                });
+                
+                // 添加新的高亮
+                chapter.classList.add('highlight-section');
+                
+                // 3秒后移除高亮
+                setTimeout(() => {
+                    chapter.classList.remove('highlight-section');
+                }, 3000);
+            }
+            
+            // 更新进度
+            function updateProgress(currentIndex) {
+                const totalChapters = chapters.length;
+                const progressPercent = ((currentIndex + 1) / totalChapters) * 100;
+                
+                document.getElementById('progressPercent').textContent = 
+                    Math.round(progressPercent) + '%';
+                document.getElementById('progressFill').style.width = progressPercent + '%';
+                
+                // 标记已完成的学习路径项
+                pathItems.forEach((item, index) => {
+                    if (index <= currentIndex) {
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                });
+            }
+            
+            // 更新导航按钮状态
+            function updateNavButtons() {
+                if (prevBtn) {
+                    prevBtn.disabled = currentChapterIndex === 0;
+                }
+                if (nextBtn) {
+                    nextBtn.disabled = currentChapterIndex === chapters.length - 1;
+                }
+            }
+            
+            // 滚动监听，更新当前章节
+            window.addEventListener('scroll', function() {
+                let current = '';
+                chapters.forEach(chapter => {
+                    const chapterTop = chapter.offsetTop;
+                    const chapterHeight = chapter.clientHeight;
+                    if (scrollY >= (chapterTop - 100)) {
+                        current = chapter.getAttribute('id');
+                    }
+                });
+                
+                if (current) {
+                    // 更新学习路径激活状态
+                    pathItems.forEach(item => {
+                        item.classList.remove('active');
+                        if (item.getAttribute('data-target') === current) {
+                            item.classList.add('active');
+                            currentChapterIndex = Array.from(chapters).findIndex(ch => ch.id === current);
+                            updateProgress(currentChapterIndex);
+                            updateNavButtons();
+                        }
+                    });
+                }
+            });
+            
+            // 代码复制功能
+            const copyButtons = document.querySelectorAll('.copy-to-clipboard-button');
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const originalText = button.textContent;
+                    button.textContent = '✅ 已复制！';
+                    button.style.background = '#2ecc71';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '';
+                    }, 2000);
+                });
+            });
+            
+            // 初始化状态
+            updateProgress(0);
+            updateNavButtons();
+            
+            // 为所有章节添加滚动偏移
+            chapters.forEach(chapter => {
+                chapter.style.scrollMarginTop = '100px';
+            });
+        });
+        
+        // 平滑滚动函数
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                const headerOffset = 100;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // 添加高亮效果
+                element.style.boxShadow = '0 0 0 3px rgba(52, 152, 219, 0.5)';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 2000);
+            }
+        }
+        
+        // 键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            const chapters = document.querySelectorAll('.section-container');
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                e.preventDefault();
+                if (currentChapterIndex < chapters.length - 1) {
+                    currentChapterIndex++;
+                    navigateToChapter(currentChapterIndex);
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                if (currentChapterIndex > 0) {
+                    currentChapterIndex--;
+                    navigateToChapter(currentChapterIndex);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
